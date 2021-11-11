@@ -1,14 +1,20 @@
-#ifndef SPHERE_H
-#define SPHERE_H
+#ifndef PARABOLOID_H
+#define PARABOLOID_H
 
 #include "hittable.h"
 #include "vec3.h"
 
-class sphere : public hittable {
-    public:
-        sphere() {}
-        sphere(point3 cen, double r, shared_ptr<material> m)
-            : center(cen), radius(r), mat_ptr(m){};
+// Equação parametrizada:
+// paraboloid(r*cos(t), r*sin(t), r^2)
+// t variando de [0, 2*pi]
+// r variando de 0 até qualquer valor maior
+
+class paraboloid : public hittable {
+    public :
+
+        paraboloid(){}
+        paraboloid(point3 cen, double r, shared_ptr<material> m)
+            : center(cen), radius(r), mat_ptr(m){}; 
 
         virtual bool hit(
             const ray &r, double t_min, double t_max, hit_record &rec) const override;
@@ -19,7 +25,7 @@ class sphere : public hittable {
         shared_ptr<material> mat_ptr;
 };
 
-bool sphere::hit(const ray &r, double t_min, double t_max, hit_record &rec) const {
+bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) const {
 
     vec3 oc = r.origin() - center;
     auto a = r.direction().length_squared();
