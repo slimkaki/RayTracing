@@ -3,6 +3,7 @@
 #include "color.h"
 #include "hittable_list.h"
 #include "sphere.h"
+#include "paraboloid.h"
 #include "ray.h"
 #include "vec3.h"
 #include "camera.h"
@@ -107,8 +108,14 @@ int main() {
 
     // World
 
-    auto world = random_scene();
+    // auto world = random_scene();
+    hittable_list world;
+    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+    world.add(make_shared<sphere>(point3(0,-1000,0), 1000, ground_material));
 
+    auto metal_material = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+    world.add(make_shared<paraboloid>(point3(0, 1, 0), 0.5, 2.0, metal_material));
+                                                                                                                                             
     // Camera
 
     point3 lookfrom(13,2,3);
