@@ -13,7 +13,7 @@ class paraboloid : public hittable {
     public :
 
         paraboloid(){}
-        paraboloid(point3 cen, double r, double size, shared_ptr<material> m)
+        paraboloid(point3 cen, double r, shared_ptr<material> m)
             : center(cen), radius(r), mat_ptr(m){}; 
 
         virtual bool hit(
@@ -27,13 +27,27 @@ class paraboloid : public hittable {
 
 bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) const {
 
-    // z = y^2/b^2 - x^2/a^2
+    // (z - O_z) = (y - O_y)^2/r^2 + (x - O_x)^2/r^2
+    // r^2 = ((y - O_y)^2 + (x - O_x)^2)/(z - O_z)
+    // r^2 = ((P(t)[1] - O_y)^2 + (P(t)[0] - O_x)^2)/(P(t)[2] - O_z)
+    // ((P(t)[1] - O_y)^2 + (P(t)[0] - O_x)^2)/(P(t)[2] - O_z) - r^2 = 0
+    // (((directionY - originY)**2 + (directionX - originX)**2)/(directionZ - originZ)) - radius**2 = 0
+    
+    
+    double originX = r.origin()[0];
+    double originY = r.origin()[1];
+    double originZ = r.origin()[2];
 
-    // 
-    vec3 oc = r.origin() - center;
-    auto a = r.direction().length_squared();
-    auto half_b = dot(oc, r.direction());
-    auto c = oc.length_squared() - radius * radius;
+    double directionX = r.direction()[0];
+    double directionY = r.direction()[1];
+    double directionZ = r.direction()[2];
+    
+    auto a = (directionY*directionY + directionX*directionX)/(directionZ - originZ);
+    //std::cerr << "a: " << a << std::endl;
+    auto half_b = (directionY*originY + directionX*originX)/(directionZ - originZ); 
+    //std::cerr << "half_b: " << half_b << std::endl;
+    auto c = ((originY*originY + originX*originX)/(directionZ - originZ)) - radius*radius;
+    //std::cerr << "c: " << c << std::endl;
 
     auto discriminant = half_b * half_b - 4 * a * c;
     if (discriminant < 0)
