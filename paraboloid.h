@@ -45,11 +45,11 @@ bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) 
 
     // if (directionZ - originZ > 5.0) return false;
     
-    auto a = (value_A*value_A*directionY*directionY) + (value_B*value_B*directionX*directionX);
+    auto a = ((value_A*value_A*directionY*directionY) + (value_B*value_B*directionX*directionX))/(value_A*value_A*value_B*value_B);
     //std::cerr << "a: " << a << std::endl;
-    auto b = (-2*value_A*value_A*directionY*originY) + (-2*value_B*value_B*directionX*originX) + (-directionZ*value_A*value_A*value_B*value_B);
+    auto b = ((-2*value_B*value_B*directionX*originX) + (-2*value_A*value_A*directionY*originY) + (-value_A*value_A*value_B*value_B*directionZ))/(value_A*value_A*value_B*value_B);
     //std::cerr << "half_b: " << half_b << std::endl;
-    auto c = (originY*originY) + (originX*originX) + (originZ*value_A*value_A*value_B*value_B);
+    auto c = (((value_B*value_B*originX*originX) + (value_A*value_A*originY*originY))/((value_A*value_A*value_B*value_B))) + originZ;
     //std::cerr << "c: " << c << std::endl;
 
     auto discriminant =  b*b - 4 * a * c;

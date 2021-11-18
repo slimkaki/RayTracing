@@ -114,22 +114,22 @@ int main() {
 
     // World
 
-    auto world = random_scene();
-    // hittable_list world;
+    // auto world = random_scene();
+    hittable_list world;
     // auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     // world.add(make_shared<sphere>(point3(0,-1000,0), 1000, ground_material));
 
-    // auto metal_material = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+    auto metal_material = make_shared<metal>(color(1.0, 0.0, 0.0), 0.0);
 
     // shared_ptr<material> diffuse_material;
     // auto albedo = color::random() * color::random();
     // diffuse_material = make_shared<lambertian>(albedo);
     
-    // world.add(make_shared<paraboloid>(point3(1, 0, 0), 2.0, 2.0, metal_material));
+    world.add(make_shared<paraboloid>(point3(1, 0, 0), 2.0, 2.0, metal_material));
     // world.add(make_shared<paraboloid>(point3(1, 1, 1), 3.0, 1.0, diffuse_material));
 
     // auto material1 = make_shared<dielectric>(1.5);
-    // world.add(make_shared<sphere>(point3(-1, 0, 1), 1.0, diffuse_material));
+    world.add(make_shared<sphere>(point3(-1, 0, 1), 1.0, metal_material));
 
     // Camera
 
