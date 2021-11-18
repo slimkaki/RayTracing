@@ -34,7 +34,6 @@ bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) 
     // ((P(t)[1] - O_y)^2 + (P(t)[0] - O_x)^2)/(P(t)[2] - O_z) - r^2 = 0
     // (((directionY*t - originY)**2 + (directionX*t - originX)**2)/(directionZ*t - originZ)) - radius**2 = 0
     
-    
     double originX = r.origin()[0];
     double originY = r.origin()[1];
     double originZ = r.origin()[2];
@@ -45,11 +44,11 @@ bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) 
 
     // if (directionZ - originZ > 5.0) return false;
     
-    auto a = ((value_A*value_A*directionY*directionY) + (value_B*value_B*directionX*directionX))/(value_A*value_A*value_B*value_B);
+    auto a = (directionX*directionX*value_B*value_B + directionY*directionY*value_A*value_A)/(value_A*value_A*value_B*value_B);//((value_A*value_A*directionY*directionY) + (value_B*value_B*directionX*directionX))/(value_A*value_A*value_B*value_B);
     //std::cerr << "a: " << a << std::endl;
-    auto b = ((-2*value_B*value_B*directionX*originX) + (-2*value_A*value_A*directionY*originY) + (-value_A*value_A*value_B*value_B*directionZ))/(value_A*value_A*value_B*value_B);
+    auto b = (((2*center[0]*directionX*value_B*value_B - 2*originX*directionX*value_B*value_B) + (2*center[1]*directionY*value_A*value_A - 2*directionY*originY*value_A*value_A))/(value_A*value_A*value_B*value_B)) - directionZ;//((-2*value_B*value_B*directionX*center[0]) + (-2*value_A*value_A*directionY*center[1]) + (-value_A*value_A*value_B*value_B*directionZ))/(value_A*value_A*value_B*value_B);
     //std::cerr << "half_b: " << half_b << std::endl;
-    auto c = (((value_B*value_B*originX*originX) + (value_A*value_A*originY*originY))/((value_A*value_A*value_B*value_B))) + originZ;
+    auto c = ((originX*originX*value_B*value_B + originY*originY*value_A*value_A - 2*originX*center[0]*value_B*value_B - 2*originY*center[1]*value_A*value_A + center[0]*center[0]*value_B*value_B + center[1]*center[1]*value_A*value_A)/(value_A*value_A*value_B*value_B))+center[2] - originZ;//(((value_B*value_B*center[0]*center[0]) + (value_A*value_A*center[1]*center[1]))/((value_A*value_A*value_B*value_B))) + center[2];
     //std::cerr << "c: " << c << std::endl;
 
     auto discriminant =  b*b - 4 * a * c;
