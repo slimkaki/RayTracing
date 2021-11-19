@@ -87,7 +87,7 @@ hittable_list random_scene() {
         auto albedo = color::random() * color::random();
         sphere_material = make_shared<lambertian>(albedo);
 
-        world.add(make_shared<paraboloid>(point3(1, 0, 0), 2.0, 2.0, sphere_material));
+        world.add(make_shared<paraboloid>(point3(1, 0, 0), 2.0, 2.0, 3.0, sphere_material));
     }
 
     auto material1 = make_shared<dielectric>(1.5);
@@ -109,27 +109,29 @@ int main() {
     const auto aspect_ratio = 3.0 / 2.0;
     const int image_width = 1200;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 2;
+    const int samples_per_pixel = 100;
     const int max_depth = 50;
 
     // World
 
-    auto world = random_scene();
-    // hittable_list world;
-    // auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    // world.add(make_shared<sphere>(point3(0,-1000,0), 1000, ground_material));
+    // auto world = random_scene();
+    hittable_list world;
+    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+    world.add(make_shared<sphere>(point3(0,-1000,0), 998, ground_material));
 
-    // auto metal_material = make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
+    auto metal_material = make_shared<metal>(color(0.8, 0.1, 0.3), 0.0);
 
-    // shared_ptr<material> diffuse_material;
-    // auto albedo = color::random() * color::random();
-    // diffuse_material = make_shared<lambertian>(albedo);
+    shared_ptr<material> diffuse_material;
+    auto albedo = color::random() * color::random();
+    diffuse_material = make_shared<lambertian>(albedo);
     
-    // world.add(make_shared<paraboloid>(point3(1, 0, 0), 2.0, 2.0, metal_material));
+    world.add(make_shared<paraboloid>(point3(0, 0, 0), 0.5, 0.5, 5.0, diffuse_material));
     // world.add(make_shared<paraboloid>(point3(1, 1, 1), 3.0, 1.0, diffuse_material));
 
-    // auto material1 = make_shared<dielectric>(1.5);
-    // world.add(make_shared<sphere>(point3(-1, 0, 1), 1.0, diffuse_material));
+    auto material1 = make_shared<dielectric>(1.5);
+    world.add(make_shared<sphere>(point3(-7, 1, -1), 1.0, material1));
+
+    world.add(make_shared<sphere>(point3(-1, 1, -5), 2.0, metal_material));
 
     // Camera
 
