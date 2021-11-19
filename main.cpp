@@ -109,7 +109,7 @@ int main() {
     const auto aspect_ratio = 3.0 / 2.0;
     const int image_width = 1200;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 100;
+    const int samples_per_pixel = 10;
     const int max_depth = 50;
 
     // World
@@ -125,7 +125,7 @@ int main() {
     auto albedo = color::random() * color::random();
     diffuse_material = make_shared<lambertian>(albedo);
     
-    world.add(make_shared<paraboloid>(point3(0, 0, 0), 0.5, 0.5, 5.0, diffuse_material));
+    world.add(make_shared<paraboloid>(point3(0, 0, 0), 0.5, 0.5, 4.0, diffuse_material));
     // world.add(make_shared<paraboloid>(point3(1, 1, 1), 3.0, 1.0, diffuse_material));
 
     auto material1 = make_shared<dielectric>(1.5);

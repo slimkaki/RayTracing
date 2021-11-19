@@ -58,23 +58,18 @@ bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) 
 
     // Find the nearest root that lies in the acceptable range.
     auto root = (-b - sqrtd) / (2 * a);
+    if ((r.at(root) - center)[2] > hl) return false;
     if (root < t_min || t_max < root) {
         root = (-b + sqrtd) / (2 * a);
         if (root < t_min || t_max < root)
             return false;
     }
 
-    if ((r.at(root) - center)[2] > hl) return false;
-
-    // std::cerr << "root: " << root << "\n";
-    // if (root > 5.0) return false;
-
     rec.t = root;
     rec.p = r.at(rec.t);
     vec3 outward_normal = (rec.p - center) / value_A*value_A*value_B*value_B;
     rec.set_face_normal(r, outward_normal);
     rec.mat_ptr = mat_ptr;
-    // std::cerr << "true\n"  <<std::endl;
     return true;
 }
 
