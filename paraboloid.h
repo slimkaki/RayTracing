@@ -13,8 +13,8 @@ class paraboloid : public hittable {
     public :
 
         paraboloid(){}
-        paraboloid(point3 cen, double valA, double valB, shared_ptr<material> m)
-            : center(cen), value_A(valA), value_B(valB), mat_ptr(m){}; 
+        paraboloid(point3 cen, double valA, double valB, double height_limit, shared_ptr<material> m)
+            : center(cen), value_A(valA), value_B(valB), hl(height_limit), mat_ptr(m){}; 
 
         virtual bool hit(
             const ray &r, double t_min, double t_max, hit_record &rec) const override;
@@ -23,6 +23,7 @@ class paraboloid : public hittable {
         point3 center;
         double value_A;
         double value_B;
+        double hl;
         shared_ptr<material> mat_ptr;
 };
 
@@ -42,13 +43,12 @@ bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) 
     double directionY = r.direction()[1];
     double directionZ = r.direction()[2];
 
-    // if (directionZ - originZ > 5.0) return false;
     
-    auto a = (directionX*directionX*value_B*value_B + directionY*directionY*value_A*value_A)/(value_A*value_A*value_B*value_B);//((value_A*value_A*directionY*directionY) + (value_B*value_B*directionX*directionX))/(value_A*value_A*value_B*value_B);
+    auto a = (directionX*directionX*value_B*value_B + directionY*directionY*value_A*value_A)/(value_A*value_A*value_B*value_B);
     //std::cerr << "a: " << a << std::endl;
-    auto b = (((2*center[0]*directionX*value_B*value_B - 2*originX*directionX*value_B*value_B) + (2*center[1]*directionY*value_A*value_A - 2*directionY*originY*value_A*value_A))/(value_A*value_A*value_B*value_B)) - directionZ;//((-2*value_B*value_B*directionX*center[0]) + (-2*value_A*value_A*directionY*center[1]) + (-value_A*value_A*value_B*value_B*directionZ))/(value_A*value_A*value_B*value_B);
+    auto b = (2*originX*directionX*value_B*value_B + 2*originY*directionY*value_A*value_A - 2*center[0]*directionX*value_B*value_B - 2*center[1]*directionY*value_A*value_A - directionZ*value_A*value_A*value_B*value_B)/(value_A*value_A*value_B*value_B);
     //std::cerr << "half_b: " << half_b << std::endl;
-    auto c = ((originX*originX*value_B*value_B + originY*originY*value_A*value_A - 2*originX*center[0]*value_B*value_B - 2*originY*center[1]*value_A*value_A + center[0]*center[0]*value_B*value_B + center[1]*center[1]*value_A*value_A)/(value_A*value_A*value_B*value_B))+center[2] - originZ;//(((value_B*value_B*center[0]*center[0]) + (value_A*value_A*center[1]*center[1]))/((value_A*value_A*value_B*value_B))) + center[2];
+    auto c = (originX*originX*value_B*value_B + originY*originY*value_A*value_A + center[0]*center[0]*value_B*value_B + center[1]*center[1]*value_A*value_A - 2*originX*center[0]*value_B*value_B - 2*originY*center[1]*value_A*value_A + center[2]*value_A*value_A*value_B*value_B - originZ*value_A*value_A*value_B*value_B)/(value_A*value_A*value_B*value_B);
     //std::cerr << "c: " << c << std::endl;
 
     auto discriminant =  b*b - 4 * a * c;
@@ -63,6 +63,8 @@ bool paraboloid::hit(const ray &r, double t_min, double t_max, hit_record &rec) 
         if (root < t_min || t_max < root)
             return false;
     }
+
+    if ((r.at(root) - center)[2] > hl) return false;
 
     // std::cerr << "root: " << root << "\n";
     // if (root > 5.0) return false;
