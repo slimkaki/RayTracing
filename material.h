@@ -111,12 +111,14 @@ class marble : public material {
             scattered = ray(rec.p, scatter_direction);
             attenuation = albedo->value(rec.u, rec.v, rec.p);
 
-            double fuzz = 0.2;
-            vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
-            scattered = ray(rec.p, reflected + fuzz*random_in_unit_sphere());
-            // attenuation = albedo2;
-            return (dot(scattered.direction(), rec.normal) > 0);
-            // return true;
+            if (random_double() > 0.3) {
+                double fuzz = 0.4;
+                vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+                scattered = ray(rec.p, reflected + fuzz*random_in_unit_sphere());
+                // attenuation = albedo2;
+                return (dot(scattered.direction(), rec.normal) > 0);
+            }
+            return true;
 
         }
 

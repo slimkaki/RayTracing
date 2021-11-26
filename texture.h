@@ -90,7 +90,7 @@ class noise_texture2 : public texture {
         virtual color value(double u, double v, const vec3& p) const override {
             // return color(1,1,1)*0.5*(1 + noise.turb(scale * p));
             // return color(1,1,1)*noise.turb(scale * p);
-            return mColor*0.7*(1 + sin(scale*p.z() + 10*noise.turb(p)));
+            return mColor*0.7*(1 + sin(scale*p.z() + 7*random_double()*noise.turb(p)));
         }
 
     public:

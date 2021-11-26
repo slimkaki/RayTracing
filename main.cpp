@@ -132,21 +132,60 @@ hittable_list two_perlin_spheres() {
 }
 
 hittable_list marble_spheres() {
+    // World Objects
     hittable_list objects;
 
+    // Textures
     auto pertext = make_shared<noise_texture>();
-    auto pertext2 = make_shared<noise_texture2>(0.5, color(0.6, 0.6, 0.9));
+    auto pertext2 = make_shared<noise_texture2>(0.5, color(0.9, 0.8, 0.9));
+    auto pertext3 = make_shared<noise_texture2>(0.5, color(0.8, 0.9, 0.8));
 
+    // Defined Materials
     // auto marble_material = make_shared<marble>(0.0);
-    auto material2 = make_shared<marble>(color(0.7, 0.7, 0.9));
+    auto lambertian_material = make_shared<lambertian>(color(0.9, 0.9, 0.9));
+    auto glass_material = make_shared<dielectric>(1.5);
+    auto metal_material = make_shared<metal>(color(0.7, 0.8, 0.7), 0.0);
+
     // Ground
-    objects.add(make_shared<sphere>(point3(0,-1000,0), 999, material2));
+    objects.add(make_shared<sphere>(point3(0,-1000,0), 999, lambertian_material));
+
+    // Objects
 
     // Marbles
-    objects.add(make_shared<sphere>(point3(0, 0, 0), 1, make_shared<marble>(pertext2))); //point3(0, 2, 0), 2, marble_material));
-    objects.add(make_shared<sphere>(point3(-4, -0.25, 2), 1, make_shared<marble>(pertext)));
+    objects.add(make_shared<sphere>(point3(0, 0, 0), 1, make_shared<marble>(pertext2)));
+    objects.add(make_shared<sphere>(point3(-4, 0, 2), 1, make_shared<marble>(pertext)));
+    objects.add(make_shared<sphere>(point3(-2, 0, -2), 1, make_shared<marble>(pertext3)));
+
+    // Glass
+    objects.add(make_shared<sphere>(point3(-8, 0, -5), 2, glass_material));
+
+    // Metal
+    objects.add(make_shared<sphere>(point3(-70, 0, -8), 5, metal_material));
 
     return objects;
+}
+
+hittable_list paraboloid_plot() {
+    hittable_list world;
+
+    auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
+    world.add(make_shared<sphere>(point3(0,-1000,0), 998, ground_material));
+
+    auto metal_material = make_shared<metal>(color(0.8, 0.1, 0.3), 0.0);
+
+    shared_ptr<material> diffuse_material;
+    auto albedo = color::random() * color::random();
+    diffuse_material = make_shared<lambertian>(albedo);
+    
+    world.add(make_shared<paraboloid>(point3(0, 0, 0), 0.5, 0.5, 4.0, diffuse_material));
+    // world.add(make_shared<paraboloid>(point3(1, 1, 1), 3.0, 1.0, diffuse_material));
+
+    auto material1 = make_shared<dielectric>(1.5);
+    world.add(make_shared<sphere>(point3(-7, 1, -1), 1.0, material1));
+
+    world.add(make_shared<sphere>(point3(-1, 1, -5), 2.0, metal_material));
+
+    world.add(make_shared<sphere>(point3(0, 0, 0), 1.0, material1));
 }
 
 int main() {
@@ -156,33 +195,14 @@ int main() {
     const auto aspect_ratio = 3.0 / 2.0;
     const int image_width = 1200;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 10;
+    const int samples_per_pixel = 100;
     const int max_depth = 50;
 
     // World
 
     hittable_list world;
-    // auto world = random_scene();
-    // world = two_perlin_spheres();
+
     world = marble_spheres();
-    // auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
-    // world.add(make_shared<sphere>(point3(0,-1000,0), 998, ground_material));
-
-    // auto metal_material = make_shared<metal>(color(0.8, 0.1, 0.3), 0.0);
-
-    // shared_ptr<material> diffuse_material;
-    // auto albedo = color::random() * color::random();
-    // diffuse_material = make_shared<lambertian>(albedo);
-    
-    // // world.add(make_shared<paraboloid>(point3(0, 0, 0), 0.5, 0.5, 4.0, diffuse_material));
-    // // world.add(make_shared<paraboloid>(point3(1, 1, 1), 3.0, 1.0, diffuse_material));
-
-    // auto material1 = make_shared<dielectric>(1.5);
-    // world.add(make_shared<sphere>(point3(-7, 1, -1), 1.0, material1));
-
-    // world.add(make_shared<sphere>(point3(-1, 1, -5), 2.0, metal_material));
-
-    // world.add(make_shared<sphere>(point3(0, 0, 0), 1.0, material1));
 
     // Camera
 
@@ -217,65 +237,3 @@ int main() {
     file.close();  // Fecha o stream para arquivo
     std::cerr << "\nDone.\n";
 }
-
-// int main() {
-
-//     // Image
-
-//     const auto aspect_ratio = 16.0 / 9.0;
-//     const int image_width = 600;
-//     const int image_height = static_cast<int>(image_width / aspect_ratio);
-//     const int samples_per_pixel = 20;
-//     const int max_depth = 50;
-
-
-//     // Mundo
-//     hittable_list world;
-//     switch (1) {
-
-//         case 1:
-//             world = earth();
-//             break;
-
-//         case 2:
-//             world = earth_cylider();
-//             break;
-
-//         case 3:
-//             world = two_perlin_spheres();
-//             break;
-
-//     }
-
-
-//     // Camera
-
-//     point3 lookfrom(13,2,3);
-//     point3 lookat(0,0,0);
-//     vec3 vup(0,1,0);
-//     auto dist_to_focus = 10.0;
-//     auto aperture = 0.1;
-//     camera cam(lookfrom, lookat, vup, 20, aspect_ratio, aperture, dist_to_focus);
-
-
-//     // Render
-
-//     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
-
-//     for (int j = image_height-1; j >= 0; --j) {
-//         std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-//         for (int i = 0; i < image_width; ++i) {
-//             color pixel_color(0,0,0);
-//             for (int s = 0; s < samples_per_pixel; ++s) {
-//                 auto u = (i + random_double()) / (image_width-1);
-//                 auto v = (j + random_double()) / (image_height-1);
-//                 ray r = cam.get_ray(u, v);
-//                 pixel_color += ray_color(r, world, max_depth);
-//             }
-//             write_color(std::cout, pixel_color, samples_per_pixel);
-//         }
-//     }
-
-//     std::cerr << "\nDone.\n";
-// }
-
