@@ -94,18 +94,35 @@ class dielectric : public material {
 
 
 // Implementando classe de marmore
-// class marble : public material {
-//     public:
-//          marble(const color& a) : albedo(make_shared<solid_color>(a)) {}
-//          marble(shared_ptr<texture> a) : albedo(a) {}
+class marble : public material {
+    public:
+        marble(const color& a) : albedo(make_shared<solid_color>(a)) {}
+        marble(shared_ptr<texture> a) : albedo(a) {}
 
-//         virtual color_value(double u,double v, const point3& p) const override {
-//             return color(1,1,1) * noise.noise(p);
-//         }
+        virtual bool scatter(
+            const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
+        ) const override {
+            auto scatter_direction = rec.normal + random_unit_vector();
 
-//     public:
-//         perlin noise;
-// };
+            // Catch degenerate scatter direction
+            if (scatter_direction.near_zero())
+                scatter_direction = rec.normal;
+
+            scattered = ray(rec.p, scatter_direction);
+            attenuation = albedo->value(rec.u, rec.v, rec.p);
+
+            double fuzz = 0.2;
+            vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+            scattered = ray(rec.p, reflected + fuzz*random_in_unit_sphere());
+            // attenuation = albedo2;
+            return (dot(scattered.direction(), rec.normal) > 0);
+            // return true;
+
+        }
+
+    public:
+        shared_ptr<texture> albedo;
+};
 
 
 #endif

@@ -131,6 +131,24 @@ hittable_list two_perlin_spheres() {
     return objects;
 }
 
+hittable_list marble_spheres() {
+    hittable_list objects;
+
+    auto pertext = make_shared<noise_texture>();
+    auto pertext2 = make_shared<noise_texture2>(0.5, color(0.6, 0.6, 0.9));
+
+    // auto marble_material = make_shared<marble>(0.0);
+    auto material2 = make_shared<marble>(color(0.7, 0.7, 0.9));
+    // Ground
+    objects.add(make_shared<sphere>(point3(0,-1000,0), 999, material2));
+
+    // Marbles
+    objects.add(make_shared<sphere>(point3(0, 0, 0), 1, make_shared<marble>(pertext2))); //point3(0, 2, 0), 2, marble_material));
+    objects.add(make_shared<sphere>(point3(-4, -0.25, 2), 1, make_shared<marble>(pertext)));
+
+    return objects;
+}
+
 int main() {
 
     // Image
@@ -145,7 +163,8 @@ int main() {
 
     hittable_list world;
     // auto world = random_scene();
-    world = two_perlin_spheres();
+    // world = two_perlin_spheres();
+    world = marble_spheres();
     // auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     // world.add(make_shared<sphere>(point3(0,-1000,0), 998, ground_material));
 
