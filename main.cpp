@@ -8,30 +8,33 @@
 #include "vec3.h"
 #include "camera.h"
 #include "material.h"
+#include "cylinder.h"
+#include "texture.h"
 
 #include <iostream>
 #include <fstream>  // para ler e gravar em arquivos.
 
+
 // Função auxiliar para criar um fundo de imagem colorido
 // pega a direcao do raio e calcula uma interpolacao entra banco e azul
 color ray_color(const ray& r, const hittable& world, int depth) {
-   hit_record rec;
+    hit_record rec;
 
-   // If we've exceeded the ray bounce limit, no more light is gathered.
-   if (depth <= 0)
-       return color(0,0,0);
+    // If we've exceeded the ray bounce limit, no more light is gathered.
+    if (depth <= 0)
+        return color(0,0,0);
 
-   if (world.hit(r, 0.001, infinity, rec)) {
-       ray scattered;
-       color attenuation;
-       if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
-           return attenuation * ray_color(scattered, world, depth-1);
-       return color(0,0,0);
-   }
+    if (world.hit(r, 0.001, infinity, rec)) {
+        ray scattered;
+        color attenuation;
+        if (rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+            return attenuation * ray_color(scattered, world, depth-1);
+        return color(0,0,0);
+    }
 
-   vec3 unit_direction = unit_vector(r.direction());
-   auto t = 0.5*(unit_direction.y() + 1.0);
-   return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
+    vec3 unit_direction = unit_vector(r.direction());
+    auto t = 0.5*(unit_direction.y() + 1.0);
+    return (1.0-t)*color(1.0, 1.0, 1.0) + t*color(0.5, 0.7, 1.0);
 }
 
 
@@ -102,20 +105,69 @@ hittable_list random_scene() {
     return world;
 }
 
-int main() {
+hittable_list earth() {
+    auto earth_texture = make_shared<image_texture>("earthmap.jpg");
+    auto earth_surface = make_shared<lambertian>(earth_texture);
+    auto globe = make_shared<sphere>(point3(0,0,0), 2, earth_surface);
+    return hittable_list(globe);
+}
 
-    // Image
+hittable_list earth_cylider() {
+    auto earth_texture = make_shared<image_texture>("earthmap.jpg");
+    auto earth_surface = make_shared<lambertian>(earth_texture);
+    auto globe = make_shared<cylinder>(point3(0,0,0), 1.5, 4, earth_surface);
+    return hittable_list(globe);
+}
 
-    const auto aspect_ratio = 3.0 / 2.0;
-    const int image_width = 1200;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 10;
-    const int max_depth = 50;
+hittable_list two_perlin_spheres() {
+    hittable_list objects;
 
-    // World
+    auto pertext = make_shared<noise_texture>();
 
-    // auto world = random_scene();
+    auto metal_material = make_shared<metal>(color(0.8, 0.1, 0.3), 0.0);
+    objects.add(make_shared<sphere>(point3(0,-1000,0), 1000, make_shared<lambertian>(pertext)));
+    objects.add(make_shared<sphere>(point3(0, 2, 0), 2, metal_material));
+
+    return objects;
+}
+
+hittable_list marble_spheres() {
+    // World Objects
+    hittable_list objects;
+
+    // Textures
+    auto pertext = make_shared<noise_texture>();
+    auto pertext2 = make_shared<noise_texture2>(0.5, color(0.9, 0.8, 0.9));
+    auto pertext3 = make_shared<noise_texture2>(0.5, color(0.8, 0.9, 0.8));
+
+    // Defined Materials
+    // auto marble_material = make_shared<marble>(0.0);
+    auto lambertian_material = make_shared<lambertian>(color(0.9, 0.9, 0.9));
+    auto glass_material = make_shared<dielectric>(1.5);
+    auto metal_material = make_shared<metal>(color(0.7, 0.8, 0.7), 0.0);
+
+    // Ground
+    objects.add(make_shared<sphere>(point3(0,-1000,0), 999, lambertian_material));
+
+    // Objects
+
+    // Marbles
+    objects.add(make_shared<sphere>(point3(0, 0, 0), 1, make_shared<marble>(pertext2)));
+    objects.add(make_shared<sphere>(point3(-4, 0, 2), 1, make_shared<marble>(pertext)));
+    objects.add(make_shared<sphere>(point3(-2, 0, -2), 1, make_shared<marble>(pertext3)));
+
+    // Glass
+    objects.add(make_shared<sphere>(point3(-8, 0, -5), 2, glass_material));
+
+    // Metal
+    objects.add(make_shared<sphere>(point3(-70, 0, -8), 5, metal_material));
+
+    return objects;
+}
+
+hittable_list paraboloid_plot() {
     hittable_list world;
+
     auto ground_material = make_shared<lambertian>(color(0.5, 0.5, 0.5));
     world.add(make_shared<sphere>(point3(0,-1000,0), 998, ground_material));
 
@@ -132,6 +184,25 @@ int main() {
     world.add(make_shared<sphere>(point3(-7, 1, -1), 1.0, material1));
 
     world.add(make_shared<sphere>(point3(-1, 1, -5), 2.0, metal_material));
+
+    world.add(make_shared<sphere>(point3(0, 0, 0), 1.0, material1));
+}
+
+int main() {
+
+    // Image
+
+    const auto aspect_ratio = 3.0 / 2.0;
+    const int image_width = 1200;
+    const int image_height = static_cast<int>(image_width / aspect_ratio);
+    const int samples_per_pixel = 100;
+    const int max_depth = 50;
+
+    // World
+
+    hittable_list world;
+
+    world = marble_spheres();
 
     // Camera
 

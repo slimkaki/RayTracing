@@ -2,6 +2,7 @@
 #define MATERIAL_H
 
 #include "rtweekend.h"
+#include "texture.h"
 
 struct hit_record;
 
@@ -13,25 +14,26 @@ class material {
 };
 
 class lambertian : public material {
-   public:
-       lambertian(const color& a) : albedo(a) {}
+    public:
+        lambertian(const color& a) : albedo(make_shared<solid_color>(a)) {}
+        lambertian(shared_ptr<texture> a) : albedo(a) {}
 
-       virtual bool scatter(
-           const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
-       ) const override {
-           auto scatter_direction = rec.normal + random_unit_vector();
+        virtual bool scatter(
+            const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
+        ) const override {
+            auto scatter_direction = rec.normal + random_unit_vector();
 
-           // Catch degenerate scatter direction
-           if (scatter_direction.near_zero())
-               scatter_direction = rec.normal;
+            // Catch degenerate scatter direction
+            if (scatter_direction.near_zero())
+                scatter_direction = rec.normal;
 
-           scattered = ray(rec.p, scatter_direction);
-           attenuation = albedo;
-           return true;
-       }
+            scattered = ray(rec.p, scatter_direction);
+            attenuation = albedo->value(rec.u, rec.v, rec.p);
+            return true;
+        }
 
-   public:
-       color albedo;
+    public:
+        shared_ptr<texture> albedo;
 };
 
 
@@ -88,6 +90,40 @@ class dielectric : public material {
             r0 = r0*r0;
             return r0 + (1-r0)*pow((1 - cosine),5);
         }
+};
+
+
+// Implementando classe de marmore
+class marble : public material {
+    public:
+        marble(const color& a) : albedo(make_shared<solid_color>(a)) {}
+        marble(shared_ptr<texture> a) : albedo(a) {}
+
+        virtual bool scatter(
+            const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered
+        ) const override {
+            auto scatter_direction = rec.normal + random_unit_vector();
+
+            // Catch degenerate scatter direction
+            if (scatter_direction.near_zero())
+                scatter_direction = rec.normal;
+
+            scattered = ray(rec.p, scatter_direction);
+            attenuation = albedo->value(rec.u, rec.v, rec.p);
+
+            if (random_double() > 0.3) {
+                double fuzz = 0.4;
+                vec3 reflected = reflect(unit_vector(r_in.direction()), rec.normal);
+                scattered = ray(rec.p, reflected + fuzz*random_in_unit_sphere());
+                // attenuation = albedo2;
+                return (dot(scattered.direction(), rec.normal) > 0);
+            }
+            return true;
+
+        }
+
+    public:
+        shared_ptr<texture> albedo;
 };
 
 

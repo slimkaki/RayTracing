@@ -10,6 +10,10 @@ Project based on the book available in the book [RayTracing in One Weekend](http
 
 The code was implemented in C++, following the book's author step-by-step.
 
-As an implementation in software, the paraboloid was developed by the students. A preview can be seen below.
+There was a new material made by the students that imitates a marble surface.
+
+![Marble Balls](images/marble.png)
+
+And also, the implementation in software, the paraboloid was developed by the students. A preview can be seen below.
 
 ![Paraboloid Scene](images/paraboloid_scene.png)
